@@ -1,0 +1,22 @@
+# Environment
+.env
+
+# CDKTF
+cdktf.out/
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate*
+
+# Build artifacts
+*.log
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
