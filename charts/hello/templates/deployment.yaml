@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hello.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "hello.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "hello.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "hello.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9113"
+        prometheus.io/path: "/metrics"
+        checksum/nginx-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/log-exporter-config: {{ include (print $.Template.BasePath "/log-exporter-configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: nginx
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          limits:
+            cpu: {{ .Values.resources.nginx.limits.cpu }}
+            memory: {{ .Values.resources.nginx.limits.memory }}
+          requests:
+            cpu: {{ .Values.resources.nginx.requests.cpu }}
+            memory: {{ .Values.resources.nginx.requests.memory }}
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: nginx-logs
+          mountPath: /var/log/nginx
+      - name: nginx-log-exporter
+        image: "quay.io/martinhelmich/prometheus-nginxlog-exporter:v1.10.0"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: metrics
+          containerPort: 4040
+          protocol: TCP
+        args:
+        - -config-file=/etc/prometheus-nginxlog-exporter/config.yml
+        volumeMounts:
+        - name: nginx-logs
+          mountPath: /var/log/nginx
+          readOnly: true
+        - name: log-exporter-config
+          mountPath: /etc/prometheus-nginxlog-exporter
+        resources:
+          limits:
+            cpu: 50m
+            memory: 64Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: {{ include "hello.fullname" . }}-nginx-config
+      - name: nginx-logs
+        emptyDir: {}
+      - name: log-exporter-config
+        configMap:
+          name: {{ include "hello.fullname" . }}-log-exporter-config

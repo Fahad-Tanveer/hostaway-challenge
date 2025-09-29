@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hello.fullname" . }}-nginx-config
+  labels:
+    app.kubernetes.io/name: {{ include "hello.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+    
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+        
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for"';
+        
+        # Custom log format for prometheus metrics  
+        log_format prometheus '$remote_addr - $remote_user [$time_local] '
+                             '"$request" $status $body_bytes_sent '
+                             '"$http_referer" "$http_user_agent" '
+                             'rt=$request_time';
+        
+        access_log  /var/log/nginx/access.log  main;
+        access_log  /var/log/nginx/app_prometheus.log prometheus;
+        error_log   /var/log/nginx/error.log;
+        
+        sendfile        on;
+        keepalive_timeout  65;
+        
+        server {
+            listen       80;
+            server_name  localhost;
+            
+            location / {
+                add_header Content-Type application/json;
+                add_header X-Endpoint-Path "/";
+                return 200 '{"message": "{{ .Values.config.successMessage }}", "version": "{{ .Values.config.version }}", "environment": "{{ .Values.environment }}", "timestamp": "$time_iso8601", "endpoint": "/"}';
+            }
+            
+            location /success {
+                add_header Content-Type application/json;
+                add_header X-Endpoint-Path "/success";
+                return 200 '{"message": "{{ .Values.config.successMessage }}", "version": "{{ .Values.config.version }}", "environment": "{{ .Values.environment }}", "timestamp": "$time_iso8601", "endpoint": "/success", "status": "success"}';
+            }
+            
+            location /fail {
+                add_header Content-Type application/json;
+                add_header X-Endpoint-Path "/fail";
+                return 500 '{"message": "This endpoint always fails", "version": "{{ .Values.config.version }}", "environment": "{{ .Values.environment }}", "timestamp": "$time_iso8601", "endpoint": "/fail", "status": "error"}';
+            }
+            
+            location /health {
+                add_header Content-Type application/json;
+                add_header X-Endpoint-Path "/health";
+                return 200 '{"status": "healthy", "version": "{{ .Values.config.version }}", "environment": "{{ .Values.environment }}"}';
+            }
+            
+            location /ready {
+                add_header Content-Type application/json;
+                add_header X-Endpoint-Path "/ready";
+                return 200 '{"status": "ready", "version": "{{ .Values.config.version }}", "environment": "{{ .Values.environment }}"}';
+            }
+            
+            error_page   500 502 503 504  /50x.html;
+            location = /50x.html {
+                root   /usr/share/nginx/html;
+            }
+        }
+    }
