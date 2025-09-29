@@ -87,7 +87,7 @@ resource "kubectl_manifest" "argocd_hello_staging" {
       project = "hello-project"
       source = {
         repoURL        = local.repository_url
-        targetRevision = "main"  # Kargo will update this to specific commit hashes
+        targetRevision = "main"
         path           = "charts/hello"
         helm = {
           valueFiles = ["values-staging.yaml"]
@@ -98,7 +98,6 @@ resource "kubectl_manifest" "argocd_hello_staging" {
         namespace = "external-staging-hello"
       }
       syncPolicy = {
-        # Disable automated sync - Kargo will trigger syncs
         syncOptions = [
           "CreateNamespace=true"
         ]
@@ -128,7 +127,7 @@ resource "kubectl_manifest" "argocd_hello_production" {
       project = "hello-project"
       source = {
         repoURL        = local.repository_url
-        targetRevision = "main"  # Kargo will update this to specific commit hashes
+        targetRevision = "main" 
         path           = "charts/hello"
         helm = {
           valueFiles = ["values-production.yaml"]
@@ -139,7 +138,6 @@ resource "kubectl_manifest" "argocd_hello_production" {
         namespace = "external-production-hello"
       }
       syncPolicy = {
-        # Disable automated sync - Kargo will trigger syncs  
         syncOptions = [
           "CreateNamespace=true"
         ]
