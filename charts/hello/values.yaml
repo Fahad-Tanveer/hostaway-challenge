@@ -39,10 +39,8 @@ tolerations: []
 
 affinity: {}
 
-# Custom configuration for demo
 config:
   successMessage: "hello it's me"
   version: "1.0.0"
 
-# Environment (staging/production)
 environment: staging
