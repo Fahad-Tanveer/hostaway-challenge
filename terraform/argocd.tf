@@ -15,7 +15,7 @@ configs:
   params:
     server.insecure: true
   secret:
-    argocdServerAdminPassword: admin
+    argocdServerAdminPassword: $2a$10$bwOuk7sQB3LZMbZzrimA1Oyd5tLLJxhda.RjJhURHsNhxMvuXfzRO
 
 server:
   service:
