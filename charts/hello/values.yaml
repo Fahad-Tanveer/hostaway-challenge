@@ -41,7 +41,7 @@ affinity: {}
 
 # Custom configuration for demo
 config:
-  successMessage: "Hello World! This is the success endpoint foo bar"
+  successMessage: "hello it's me"
   version: "1.0.0"
 
 # Environment (staging/production)
