@@ -184,7 +184,6 @@ We manage the reliability of our service using a framework based on **Service Le
 - **MTTD (Mean Time to Detection):**  
   The average time taken to detect that a service-level breach has occurred.
 
----
 
 ### Application-specific SLIs and SLOs (hello service)
 
@@ -224,7 +223,6 @@ These SLIs focus on the operational health of the local cluster and its ability 
   - Why it’s necessary: sustained high utilization leads to throttling or OOMKills, causing latency spikes and outages.
   - Alerting: CPU >85% of Pod request for 10 minutes; Memory >90% of request for 5 minutes or any OOMKill event.
 
----
 
 ### GitOps Tooling Health
 
@@ -238,7 +236,6 @@ Automation layers **Argo CD** and **Kargo** enforce the desired state; their hea
   - Why it’s necessary: failed or stuck promotions halt Staging → Production flow and leave environments inconsistent.
   - Alerting: any promotion remains `Failed` (or equivalent) for >15 minutes.
 
----
 
 ### Incident Response Goal (MTTD)
 
