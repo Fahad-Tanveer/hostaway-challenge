@@ -18,9 +18,10 @@ Before running the setup script, ensure the following tools are installed and ac
 
 ## 1-Command Setup and Run
 
-To initialize the entire environment, run the following command from the root of this repository:
+To initialize the entire environment, run the following commands from the root of this repository:
 
 ```bash
+chmod +x ./setup.sh
 ./setup.sh
 ```
 
