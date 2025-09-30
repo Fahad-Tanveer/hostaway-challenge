@@ -173,7 +173,7 @@ We manage the reliability of our service using a framework based on **Service Le
 
 ---
 
-## SRE Framework Definitions
+### SRE Framework Definitions
 
 - **SLI (Service Level Indicator):**  
   A quantitative measurement of the service level we provide (e.g., latency, success rate).
@@ -186,7 +186,7 @@ We manage the reliability of our service using a framework based on **Service Le
 
 ---
 
-## Application-specific SLIs and SLOs (hello service)
+### Application-specific SLIs and SLOs (hello service)
 
 Data source: the `prometheus-nginxlog-exporter` sidecar on port `4040` exposes request metrics for the `hello service`. Metrics include an `env` label (`staging` or `production`).
 
@@ -208,7 +208,7 @@ Data source: the `prometheus-nginxlog-exporter` sidecar on port `4040` exposes r
   - Why it’s necessary: the 99.9% production SLO implies ~43.2 minutes monthly error budget; overrun means we pause non-critical changes and focus on reliability.
 
 
-## Minikube Stability and Reliability
+### Minikube Stability and Reliability
 
 These SLIs focus on the operational health of the local cluster and its ability to maintain desired state for the hello workloads.
 
@@ -226,7 +226,7 @@ These SLIs focus on the operational health of the local cluster and its ability 
 
 ---
 
-## GitOps Tooling Health
+### GitOps Tooling Health
 
 Automation layers **Argo CD** and **Kargo** enforce the desired state; their health is critical for reliable delivery.
 
@@ -240,7 +240,7 @@ Automation layers **Argo CD** and **Kargo** enforce the desired state; their hea
 
 ---
 
-## Incident Response Goal (MTTD)
+### Incident Response Goal (MTTD)
 
 - Metric: Mean Time to Detection (MTTD)
   - Target: ≤ 5 minutes (production)
