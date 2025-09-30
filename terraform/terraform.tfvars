@@ -7,6 +7,6 @@ github_username = "Fahad-Tanveer"
 # Required: Your GitHub Personal Access Token
 # Generate at: https://github.com/settings/tokens
 # Required permissions: repo, read:org
-github_pat = "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"
+github_pat = "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"
 
 repository_name = "hostaway-challenge"
