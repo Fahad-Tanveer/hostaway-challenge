@@ -26,6 +26,14 @@ chmod +x ./setup.sh
 ./setup.sh
 ```
 
+### Troubleshooting
+
+- If you see CRD/webhook timing errors (e.g., "isn't valid for cluster" or admission webhook denied), just rerun:
+
+```bash
+cd terraform && terraform apply -auto-approve
+```
+
 ## Setup Script Overview
 
 The `./setup.sh` script triggers Terraform to provision the stack in this order:
@@ -39,14 +47,6 @@ The `./setup.sh` script triggers Terraform to provision the stack in this order:
 5. **Helm Installation (Kargo)** – Installs Kargo into the `kargo` namespace.  
 6. **Argo CD Project & Applications** – Creates the AppProject and the `hello-staging` and `hello-production` Applications that sync the Helm chart from Git.  
    - Note: The `hello` project namespace is created by Kargo during Project initialization. Do not pre-create it.  
-
-### Troubleshooting
-
-- If you see CRD/webhook timing errors (e.g., "isn't valid for cluster" or admission webhook denied), just rerun:
-
-```bash
-cd terraform && terraform apply -auto-approve
-```
 
 
 ## Accessing the Tooling
