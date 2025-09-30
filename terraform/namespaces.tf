@@ -34,13 +34,6 @@ resource "kubernetes_namespace" "kargo" {
   }
 }
 
-
-resource "kubernetes_namespace" "monitoring" {
-  metadata {
-    name = "monitoring"
-  }
-}
-
 resource "kubernetes_namespace" "cert-manager" {
   metadata {
     name = "cert-manager"
