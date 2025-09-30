@@ -6,6 +6,9 @@ resource "helm_release" "kargo" {
   version    = "1.7.5"
   namespace  = kubernetes_namespace.kargo.metadata[0].name
 
+  wait    = true
+  timeout = 600
+
   values = [
     <<EOF
 controller:

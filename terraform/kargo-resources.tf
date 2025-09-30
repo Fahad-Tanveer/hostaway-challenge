@@ -1,8 +1,7 @@
 # Wait for Kargo CRDs to be available
 resource "time_sleep" "wait_for_kargo_crds" {
   depends_on = [helm_release.kargo]
-
-  create_duration = "1s"
+  create_duration = "45s"
 }
 
 # Kargo Project
@@ -32,7 +31,6 @@ resource "kubectl_manifest" "kargo_project" {
 
 resource "time_sleep" "wait_for_kargo_project" {
   depends_on = [kubectl_manifest.kargo_project]
-
   create_duration = "10s"
 }
 

@@ -10,7 +10,7 @@ Before running the setup script, ensure the following tools are installed and ac
 
 - [Minikube](https://minikube.sigs.k8s.io/docs/) – For running the local Kubernetes cluster  
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) – The Kubernetes command-line tool  
-- [Terraform](https://www.terraform.io/) – For provisioning cluster components and namespaces  
+- [Terraform](https://www.terraform.io/) – For provisioning cluster components and namespaces. `version = v1.5.7`
 - [Helm](https://helm.sh/) – The Kubernetes package manager  
 - [Git](https://git-scm.com/) – For managing the application repository  
 
@@ -30,13 +30,22 @@ chmod +x ./setup.sh
 The `./setup.sh` script triggers Terraform to provision the stack in this order:
 
 1. **Minikube Start** – Starts the local Kubernetes cluster.  
-2. **Terraform Provisioning** – Creates application namespaces and system namespaces:  
+2. **Terraform Provisioning** – Creates application and system namespaces:  
    - Application: `external-staging-hello`, `external-production-hello`  
-   - System: `argocd`, `kargo`, `cert-manager` 
+   - System: `argocd`, `kargo`, `cert-manager`  
 3. **Helm Installation (cert-manager)** – Installs cert-manager into the `cert-manager` namespace.  
 4. **Helm Installation (Argo CD)** – Installs Argo CD into the `argocd` namespace.  
 5. **Helm Installation (Kargo)** – Installs Kargo into the `kargo` namespace.  
 6. **Argo CD Project & Applications** – Creates the AppProject and the `hello-staging` and `hello-production` Applications that sync the Helm chart from Git.  
+   - Note: The `hello` project namespace is created by Kargo during Project initialization. Do not pre-create it.  
+
+### Troubleshooting
+
+- If you see CRD/webhook timing errors (e.g., "isn't valid for cluster" or admission webhook denied), just rerun:
+
+```bash
+cd terraform && terraform apply -auto-approve
+```
 
 
 ## Accessing the Tooling
@@ -74,7 +83,7 @@ kubectl port-forward -n kargo svc/kargo-api 8081:443
 
 **Access Details:**
 
-- **Host:** [https://localhost:80801/](https://localhost:80801/)  
+- **Host:** [https://localhost:8081/](https://localhost:8081/)  
 - **Username:** `admin`  
 - **Password:** `admin`
 
@@ -95,11 +104,15 @@ We use **Kargo** to manage the movement of releases between environments.
 - **Promote to Staging:** In the Kargo UI, find the new commit at the top of the Commits list. Promote this new commit/release to the `hello-staging` stage.  
 - **ArgoCD Sync:** Kargo automatically updates the target revision of the `hello-staging` ArgoCD Application to the new commit SHA. ArgoCD then synchronizes the change to the `external-staging-hello` namespace.  
 
+![Pipeline Diagram](images/staging-deployment.png)
+
 ### 2. Promotion to Production
 
 - **Promote Upstream:** In the Kargo UI, select the `hello-production` stage.  
 - **Promote:** Click the promotion button and select the upstream stage (`hello-staging`) as the source for the promotion.  
 - **ArgoCD Sync:** Kargo updates the target revision of the `hello-production` ArgoCD Application to match the version running in Staging. ArgoCD synchronizes the successful release to the `external-production-hello` namespace.  
+
+![Pipeline Diagram](images/promote-to-prod.png)
 
 ### 3. Rollback
 
@@ -108,6 +121,8 @@ We use **Kargo** to manage the movement of releases between environments.
   1. Select the target stage (`hello-production`).  
   2. Click the promotion button, but instead of using the upstream stage, select the specific known-good Commit SHA from the list.  
 - **Result:** Kargo immediately updates the ArgoCD application to point to the older SHA, initiating a rollback to the previous stable state.  
+
+![Pipeline Diagram](images/promote-to-prod.png)
 
 ## Application Access and Metrics
 

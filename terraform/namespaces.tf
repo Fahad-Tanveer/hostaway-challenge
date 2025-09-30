@@ -39,3 +39,5 @@ resource "kubernetes_namespace" "cert-manager" {
     name = "cert-manager"
   }
 }
+
+
