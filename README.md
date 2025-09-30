@@ -122,7 +122,7 @@ We use **Kargo** to manage the movement of releases between environments.
   2. Click the promotion button, but instead of using the upstream stage, select the specific known-good Commit SHA from the list.  
 - **Result:** Kargo immediately updates the ArgoCD application to point to the older SHA, initiating a rollback to the previous stable state.  
 
-![Pipeline Diagram](images/promote-to-prod.png)
+![Pipeline Diagram](images/rollback.png)
 
 ## Application Access and Metrics
 
