@@ -165,3 +165,87 @@ curl -s http://localhost:8082/success
 ```bash
 curl -i http://localhost:8082/fail
 ```
+
+# Key Monitoring Metrics and Thresholds
+
+We manage the reliability of our service using a framework based on **Service Level Indicators (SLIs)**, **Service Level Objectives (SLOs)**, and **core incident metrics**.
+
+---
+
+## SRE Framework Definitions
+
+- **SLI (Service Level Indicator):**  
+  A quantitative measurement of the service level we provide (e.g., latency, success rate).
+
+- **SLO (Service Level Objective):**  
+  The target value for a chosen SLI. This is our internal commitment to reliability (e.g., 99.9% uptime).
+
+- **MTTD (Mean Time to Detection):**  
+  The average time taken to detect that a service-level breach has occurred.
+
+---
+
+## Application-specific SLIs and SLOs (hello service)
+
+Data source: the `prometheus-nginxlog-exporter` sidecar on port `4040` exposes request metrics for the `hello service`. Metrics include an `env` label (`staging` or `production`).
+
+- SLI: Availability (success rate)
+  - Why it’s necessary: ensures users can reliably hit `/`, `/success`, and `/health` without server errors; captures backend or config regressions quickly.
+  - SLOs: staging ≥ 99.0%; production ≥ 99.9% (5-minute windows)
+  - Alerting: page if production < 99.5% for 5 minutes; warn if staging < 98.5% for 10 minutes.
+
+- SLI: Latency (P95)
+  - Why it’s necessary: reflects tail performance seen by real users; protects UX from slow responses due to resource pressure or template issues.
+  - SLOs: staging ≤ 300ms; production ≤ 500ms (5-minute windows)
+  - Alerting: warn at 400ms (staging) and 600ms (production) sustained 5 minutes.
+
+- SLI: Endpoint health (intentional failure isolation)
+  - Why it’s necessary: `/fail` should be the only source of 5xx by design; any 5xx elsewhere indicates a genuine defect in the hello app or Nginx config.
+  - Alerting: raise an incident on any non-zero 5xx rate outside `/fail`.
+
+- SLI: Traffic (QPS) — production drop detection
+  - Why it’s necessary: detects sudden demand collapse from routing issues, DNS problems, or app crashes even if health checks remain green.
+  - Alerting: trigger on sharp traffic drops (e.g., >80% vs prior 15-minute baseline).
+
+- SLO/Error budget policy
+  - Why it’s necessary: the 99.9% production SLO implies ~43.2 minutes monthly error budget; overrun means we pause non-critical changes and focus on reliability.
+
+
+## Minikube Stability and Reliability
+
+These SLIs focus on the operational health of the local cluster and its ability to maintain desired state for the hello workloads.
+
+- SLI: Pod restart rate (hello namespaces)
+  - Why it’s necessary: detects crash loops and memory/CPU starvation impacting availability of `hello` Pods.
+  - Alerting: any single Pod with >3 restarts in 15 minutes (staging or production) triggers an incident.
+
+- SLI: Scheduling stability (hello workloads)
+  - Why it’s necessary: prolonged Pending or frequent evictions indicate insufficient cluster capacity or node instability.
+  - Alerting: any `hello` Pod Pending >5 minutes; and noticeable spikes in `kube_node_not_ready` events.
+
+- SLI: Resource contention (CPU and memory, hello Pods)
+  - Why it’s necessary: sustained high utilization leads to throttling or OOMKills, causing latency spikes and outages.
+  - Alerting: CPU >85% of Pod request for 10 minutes; Memory >90% of request for 5 minutes or any OOMKill event.
+
+---
+
+## GitOps Tooling Health
+
+Automation layers **Argo CD** and **Kargo** enforce the desired state; their health is critical for reliable delivery.
+
+- SLI: Argo CD application status (hello-production)
+  - Why it’s necessary: sustained `OutOfSync`/`Degraded` means the cluster diverges from Git, blocking safe rollbacks and drift correction.
+  - Alerting: `hello-production` is `Degraded` or `OutOfSync` for >10 consecutive minutes.
+
+- SLI: Kargo promotion outcomes (hello project)
+  - Why it’s necessary: failed or stuck promotions halt Staging → Production flow and leave environments inconsistent.
+  - Alerting: any promotion remains `Failed` (or equivalent) for >15 minutes.
+
+---
+
+## Incident Response Goal (MTTD)
+
+- Metric: Mean Time to Detection (MTTD)
+  - Target: ≤ 5 minutes (production)
+  - Why it’s necessary: ensures engineers are paged promptly when SLIs breach, minimizing user impact while avoiding noise via sustained thresholds.
+
