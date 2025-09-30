@@ -31,7 +31,7 @@ The `./setup.sh` script triggers Terraform to provision the stack in this order:
 1. **Minikube Start** – Starts the local Kubernetes cluster.  
 2. **Terraform Provisioning** – Creates application namespaces and system namespaces:  
    - Application: `external-staging-hello`, `external-production-hello`  
-   - System: `argocd`, `kargo`, `cert-manager`, `monitoring`  
+   - System: `argocd`, `kargo`, `cert-manager` 
 3. **Helm Installation (cert-manager)** – Installs cert-manager into the `cert-manager` namespace.  
 4. **Helm Installation (Argo CD)** – Installs Argo CD into the `argocd` namespace.  
 5. **Helm Installation (Kargo)** – Installs Kargo into the `kargo` namespace.  
