@@ -92,6 +92,8 @@ In the Kargo UI, click on the hello project. You will see the pipeline (similar 
 
 ![Pipeline Diagram](images/kargo-3.png)
 
+Promoting a release in Kargo updates the targetRevision of the corresponding Argo CD Application to the selected commit SHA; Argo CD then syncs that revision to the cluster.
+
 ![Pipeline Diagram](images/argocd-2.png)
 
 ## GitOps Workflow: Deployment, Promotion, and Rollback
