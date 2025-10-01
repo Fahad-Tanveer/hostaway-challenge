@@ -197,9 +197,9 @@ Data source: the `prometheus-nginxlog-exporter` sidecar on port `4040` exposes r
   - Alerting: page if production < 99.5% for 5 minutes; warn if staging < 98.5% for 10 minutes.
 
 - **SLI: Latency (P95)**
-  - **Why it’s necessary:** Captures tail performance experienced by real users; protects user experience from slow responses due to resource contention or inefficient templates.
-  - **SLO:** P95 latency ≤ **300ms** over a rolling 5-minute window (staging and production).
-  - **Alerting Threshold:** Trigger an alert if P95 latency exceeds **400ms** for 3 consecutive minutes in either environment.
+  - Why it’s necessary: Captures tail performance experienced by real users; protects user experience from slow responses due to resource contention or inefficient templates.
+  - SLO: P95 latency ≤ **300ms** over a rolling 5-minute window (staging and production).
+  - Alerting Threshold: Trigger an alert if P95 latency exceeds **400ms** for 3 consecutive minutes in either environment.
 
 - **SLI: Traffic (QPS) — production drop detection**
   - Why it’s necessary: detects sudden demand collapse from routing issues, DNS problems, or app crashes even if health checks remain green.
